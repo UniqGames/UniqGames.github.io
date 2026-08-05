@@ -1,0 +1,320 @@
+# Uniq Games website
+
+The public site for the studio (**Uniq Games**) and its first title (**Monster
+Sort**). It exists primarily because the game links out to it from the Settings
+screen, and secondarily as the marketing and press home for the studio.
+
+Plain static HTML, CSS and JavaScript. No framework, no bundler, no build step —
+what is in this repository is exactly what gets served, minus `tools/`.
+
+The game lives in a separate repository (`UniqGames/MonsterSort`). Tasks below
+that belong to the game rather than the site say so.
+
+---
+
+## The pages the game depends on
+
+Four URLs are hardcoded in the Unity project and opened with
+`Application.OpenURL`. **They must keep working at these exact paths**, or the
+buttons in Settings break:
+
+| URL | Opened from |
+| --- | --- |
+| `uniqgames.net/support` | Support row — `Settings/SettingsPageView.cs` |
+| `uniqgames.net/terms` | Terms of Service row — `Settings/SettingsTermsPopup.cs` |
+| `uniqgames.net/privacy` | Privacy Policy row — `Settings/SettingsTermsPopup.cs` |
+| `uniqgames.net/privacy-preferences` | Privacy Preferences row — `Settings/SettingsTermsPopup.cs` |
+
+Those scripts are in the game repository, and their defaults are also serialized
+into `Assets/_Project/Prefabs/UI/SettingsPage.prefab`. **Changing one without the
+other silently does nothing**, because the prefab value wins at runtime.
+
+Each page is served from a directory (`support/index.html` and so on), so a
+request without the trailing slash is redirected to the canonical URL with one.
+`tools/check_links.py` verifies this in CI.
+
+---
+
+## Local preview
+
+```bash
+python3 -m http.server 8099
+# http://localhost:8099
+```
+
+Use a server rather than opening the files directly; every path in the markup is
+site-absolute (`/assets/...`), which `file://` cannot resolve.
+
+---
+
+## Before this goes live
+
+### 1. Remove the third-party art still in the game
+
+*(Game repository.)* `Assets/Royal/` holds two files taken from another studio's
+game, and one of them is **actively used**:
+
+```
+Assets/Royal/Scenes/Home/CardCollection/Bundle/Common/PackAnimation/
+  Sprites/CardRotation/cc-card_rotation_gold_card_without_shadow.png
+```
+
+It is the emission shape of the New Item celebration particle system
+(`ShapeModule`, `type: 19` = Sprite) in both
+`Assets/_Project/Prefabs/UI/FX/NewItemParticle.prefab` and the stray
+`Assets/new_item_particle.prefab`. Particles spawn along its outline, so it is
+never drawn on screen — only its silhouette matters, which makes it easy to
+replace with an equivalent rounded-rectangle frame of our own.
+
+`Assets/Royal/Infrastructure/Utils/Sprites/Additive Particle Material.mat` is
+unreferenced and can simply be deleted.
+
+Do this in Unity so the GUIDs are rewritten properly, then delete `Assets/Royal/`
+entirely. **This is a shipping blocker, not a cosmetic one.**
+
+### 2. Fill in the legal placeholders
+
+Bracketed placeholders are deliberately visible so they cannot be missed. Find
+them with:
+
+```bash
+rg -i '\[[a-z][^\]]*\]' --glob '*.html'
+```
+
+| Placeholder | Appears in |
+| --- | --- |
+| `[registered legal entity name]`, `[registered address]`, `[country]`, `[company registration number]` | `privacy/`, `terms/` |
+| `[representative name and address]` — an EU/UK Article 27 representative, if one is required | `privacy/` |
+| `[governing law jurisdiction]`, `[competent courts]` | `terms/` |
+
+**These documents are a solid, accurate starting point written against how the
+game actually works — not legal advice.** Have a lawyer review them before
+launch, particularly the governing-law, liability and consumer-rights clauses.
+
+### 3. Consider a mailbox on the domain
+
+The site publishes one address, `uniqgames@gmail.com`, and it is the only
+contact route anywhere on the site or in the legal pages. That works, but a
+personal Gmail address on a privacy policy reads as less accountable to both
+app-store reviewers and data-protection regulators. Once the domain is live,
+`support@uniqgames.net` forwarding to the same inbox costs nothing and looks
+considerably more solid. If you switch, update every page at once:
+
+```bash
+rg -l 'uniqgames@gmail\.com' --glob '*.html'
+```
+
+### 4. Set the bundle ID in Unity
+
+*(Game repository.)* The agreed identifier is `com.monstersort.monstersort`, which is what
+`GoogleService-Info.plist` already uses. `ProjectSettings.asset` still has the
+old `com.factoryofmonstersgame.factoryofmonsters` for `Android` and `iPhone`,
+and the untouched default `com.DefaultCompany.2D-URP` for `Standalone`. All
+three need setting in Player Settings, per platform tab, before store
+submission. Afterwards, register the Android app under the new package name in
+the Firebase console and drop the regenerated `google-services.json` into
+`Assets/`.
+
+### 5. Swap the placeholder store badges at launch
+
+The App Store and Google Play badges are inert, marked `aria-disabled="true"`
+and labelled "Coming soon". Find every instance with:
+
+```bash
+rg 'aria-disabled="true"' --glob '*.html'
+```
+
+Turn each `<span class="store-badge">` into an `<a href="...">`, drop the
+`aria-disabled` attribute, and change "Coming soon on" to "Download on" /
+"Get it on". Apple and Google both require their official badge artwork on
+store-listing links, so replace the inline SVGs with the downloaded assets at
+that point.
+
+### 6. Approve the character copy
+
+The three monsters on `/monster-sort/` are deliberately unnamed, because nothing
+in the Unity project names them — the art ships as `character_1/2/3.png` and the
+site's assets follow suit as `monster-red/yellow/teal.webp`. Only the short trait
+lines and biographies are invented copy; approve or rewrite those. If you ever do
+name the characters in-game, name them here too.
+
+---
+
+## Deploying to GitHub Pages
+
+`.github/workflows/deploy.yml` publishes on every push to `main`. It runs the
+two checks below first, then uploads the repository with `tools/`, `.github/`
+and `.git/` stripped out.
+
+The repository is named `UniqGames.github.io`, which makes it the account's user
+site: it serves from the root of `https://uniqgames.github.io` even before the
+custom domain resolves. That matters because every path in the markup is
+site-absolute, so a project repository serving from `/<repo>/` would break them.
+It is public, which is what keeps Pages free — a private repository would
+require GitHub Pro.
+
+One-time setup:
+
+1. **Repository → Settings → Pages → Source: GitHub Actions.**
+2. At Natro, open **Alan Adı → DNS Yönetimi** for `uniqgames.net` and point the
+   apex at GitHub:
+
+   ```
+   A     @   185.199.108.153
+   A     @   185.199.109.153
+   A     @   185.199.110.153
+   A     @   185.199.111.153
+   AAAA  @   2606:50c0:8000::153
+   AAAA  @   2606:50c0:8001::153
+   AAAA  @   2606:50c0:8002::153
+   AAAA  @   2606:50c0:8003::153
+   CNAME www uniqgames.github.io
+   ```
+
+   Remove any pre-existing `A` record pointing at the Natro hosting IP, or the
+   domain will keep resolving there.
+
+3. Enter `uniqgames.net` under **Settings → Pages → Custom domain**, wait for
+   the certificate, then enable **Enforce HTTPS**.
+4. Point `uniqgames.xyz` at the same place with Natro's **Alan Adı Yönlendirme**
+   (301 to `https://uniqgames.net`). GitHub Pages serves one custom domain per
+   repository, so the second domain has to be redirected at the registrar.
+
+`CNAME` and `.nojekyll` at the repository root are both required and must stay.
+The Natro hosting package is not used by any of this — it can sit idle or be
+repurposed.
+
+### Changing the domain
+
+If the site ever moves, update all four of these together:
+
+1. `CNAME`
+2. Every `<link rel="canonical">` and `og:url` — `rg uniqgames.net --glob '*.html'`
+3. `sitemap.xml` and `robots.txt`
+4. **The four hardcoded URLs in the game repository** listed at the top of this
+   file, in both the scripts and `SettingsPage.prefab`. Players on an older
+   build will keep hitting the old domain, so keep a redirect from it for as
+   long as those builds are in the wild.
+
+---
+
+## Maintenance tools
+
+Everything in `tools/` is development-only and is excluded from what gets
+deployed.
+
+```bash
+python3 tools/sync_shell.py           # push header/footer from index.html to every page
+python3 tools/sync_shell.py --check   # CI: fail if any page has drifted
+python3 tools/check_links.py          # CI: internal links, #fragments, assets, img alt
+python3 tools/build_assets.py         # regenerate assets/img/ from the Unity art
+```
+
+**`index.html` is the source of truth for the header and footer.** Edit the
+navigation there, then run `sync_shell.py` — it rewrites the markup between the
+`<!-- shell:header -->` and `<!-- shell:footer -->` markers on every other page
+and sets `aria-current="page"` on links pointing at the page being written. CI
+fails if you forget.
+
+`tools/responsive-audit.html` loads every page in an iframe at 320, 390, 768,
+1024 and 1440 pixels and reports any horizontal overflow. Open
+`http://localhost:8099/tools/responsive-audit.html` while the preview server is
+running. All pages currently pass at every width.
+
+### Regenerating images
+
+`build_assets.py` reads the game's `Assets/_Project/Art/Sprites/`, resizes, trims
+transparent margins, hue-rotates the candy sprite into the six match colours,
+and composes the key art and the 1200×630 Open Graph card. It needs Pillow, and
+it needs the game repository checked out:
+
+```bash
+python3 -m pip install Pillow
+python3 tools/build_assets.py
+```
+
+It looks for the game checkout as a sibling of this one. If yours lives
+somewhere else, point it there:
+
+```bash
+UNITY_PROJECT=~/code/MonsterSort python3 tools/build_assets.py
+```
+
+Two things about it are worth knowing:
+
+- **The logo is assembled, not copied.** No flattened Monster Sort wordmark
+  exists in the project. The game builds it at runtime from three sprites —
+  `logo_a` (badge plate), `logo_b` ("MONSTER"), `logo_c` ("SORT") — using the
+  constants in `WinCelebrationLayout.cs`. `lockup()` reproduces that same
+  geometry, so if the in-game layout is retuned, copy the new numbers across and
+  re-run. It emits both a bare wordmark and the badge version.
+- **The candy source sits at `Assets/candy_1.png`**, loose in the project root
+  rather than under `Art/Sprites/`, and is not referenced by
+  `CandyColorDatabase`. If it is ever tidied away, update the path in
+  `build_assets.py`.
+
+There is no shippable gameplay capture in the project, so the phone frames show
+composed key art — the game's own backdrop with the logo, candy and cast on top.
+Replace `screen-splash` with a real screenshot when one exists.
+
+Content images are **WebP only**. PNG survives just where a platform demands it
+(favicons, the Apple touch icon, the PWA manifest icons), and the Open Graph
+card is additionally written as JPEG because some scrapers still reject WebP.
+
+---
+
+## Structure
+
+```
+.
+├── index.html                  Studio home — source of truth for the shell
+├── monster-sort/               Game page: how it plays, characters, world, events
+├── about/                      The studio
+├── support/                    ← linked from the game
+├── terms/                      ← linked from the game
+├── privacy/                    ← linked from the game
+├── privacy-preferences/        ← linked from the game
+├── 404.html
+├── assets/css/main.css         The whole design system, one file
+├── assets/js/main.js           Progressive enhancement only
+├── assets/img/                 Generated — do not hand-edit
+├── CNAME  .nojekyll  robots.txt  sitemap.xml  site.webmanifest
+└── tools/                      Dev only, not deployed
+```
+
+---
+
+## Design system
+
+A light, generous, corporate-minimal shell with heavily rounded media cards, so
+the game's saturated art carries all the colour. Tokens live at the top of
+`assets/css/main.css`.
+
+| | |
+| --- | --- |
+| Typeface | Satoshi, loaded from Fontshare, with a system-font fallback stack |
+| Type scale | 62 → 36 px display, 20 → 18 px body, interpolated with `clamp()` rather than breakpoints |
+| Neutrals | `#1e1e1e` text, `#f5f5f7` alternate section, white base |
+| Brand | `#7a2ff2` violet, `#ffd645` gold — both taken from the game's `UiTheme.asset` |
+| Spacing | 8 px scale, 4 → 160 px |
+| Radius | Pill buttons, `clamp(28px, 4vw, 80px)` on media cards |
+
+`main.js` only enhances: the sticky-header shadow, the mobile menu,
+copy-to-clipboard, scroll reveals, the preferences form and the footer year.
+Every page is fully readable and navigable with JavaScript disabled, and all
+motion is dropped under `prefers-reduced-motion`.
+
+### Accessibility
+
+Skip link, semantic landmarks, visible focus rings, `aria-current` on the active
+nav item, labelled toggles, alt text on every content image (enforced by
+`check_links.py`), and disclosure widgets built on native `<details>` so they
+work without scripting.
+
+### Privacy
+
+The site sets **no cookies at all** — no analytics, no advertising, no tracking
+— which is why there is no consent banner. The only client-side storage is the
+`uniqgames.privacy-preferences` key written by the preferences form. Section 11
+of `privacy/` states this in writing, so if analytics are ever added, that
+section and a real consent mechanism have to land in the same change.

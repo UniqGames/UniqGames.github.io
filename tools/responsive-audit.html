@@ -1,0 +1,62 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Responsive audit</title>
+<body style="margin:0;font:14px/1.6 ui-monospace,monospace;background:#111;color:#ddd">
+<pre id="out" style="margin:0;padding:16px"></pre>
+<iframe id="f" style="border:0;position:absolute;left:-9999px;top:0"></iframe>
+<script>
+const PAGES = [
+  '/', '/monster-sort/', '/about/', '/support/', '/terms/', '/privacy/',
+  '/privacy-preferences/', '/404.html'
+];
+const WIDTHS = [320, 390, 768, 1024, 1440];
+const out = document.getElementById('out');
+const f = document.getElementById('f');
+const rows = [];
+
+function scrollable(el) {
+  for (let n = el.parentElement; n && n !== el.ownerDocument.body; n = n.parentElement) {
+    const ox = getComputedStyle(n).overflowX;
+    if (ox === 'auto' || ox === 'scroll' || ox === 'hidden') return true;
+  }
+  return false;
+}
+
+function audit(page, width) {
+  return new Promise(resolve => {
+    f.style.width = width + 'px';
+    f.style.height = '900px';
+    f.onload = () => {
+      const d = f.contentDocument;
+      const sw = d.documentElement.scrollWidth;
+      const bad = [];
+      if (sw > width) {
+        d.querySelectorAll('body *').forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (r.right > width + 1 && !scrollable(el)) {
+            const cls = typeof el.className === 'string' && el.className
+              ? '.' + el.className.trim().split(/\s+/).join('.') : '';
+            bad.push(el.tagName.toLowerCase() + cls + ' →' + Math.round(r.right));
+          }
+        });
+      }
+      rows.push(
+        (sw > width ? 'FAIL ' : 'ok   ') + width.toString().padStart(4) +
+        '  ' + page + (sw > width ? '  scrollWidth=' + sw + '  ' + bad.slice(0, 3).join(' | ') : '')
+      );
+      out.textContent = rows.join('\n');
+      resolve();
+    };
+    f.src = page;
+  });
+}
+
+(async () => {
+  for (const page of PAGES) {
+    for (const width of WIDTHS) await audit(page, width);
+  }
+  const fails = rows.filter(r => r.startsWith('FAIL')).length;
+  out.textContent = rows.join('\n') + '\n\n' + (fails ? fails + ' FAILURES' : 'ALL PASS — no horizontal overflow');
+})();
+</script>
+</body>
