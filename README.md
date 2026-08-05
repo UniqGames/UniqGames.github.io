@@ -49,30 +49,11 @@ site-absolute (`/assets/...`), which `file://` cannot resolve.
 
 ## Before this goes live
 
-### 1. Remove the third-party art still in the game
+This repository is public, so it covers the site only. The game's own launch
+blockers are tracked privately, in `Assets/_Project/Documentation/PRE-LAUNCH.md`
+in the game repository.
 
-*(Game repository.)* `Assets/Royal/` holds two files taken from another studio's
-game, and one of them is **actively used**:
-
-```
-Assets/Royal/Scenes/Home/CardCollection/Bundle/Common/PackAnimation/
-  Sprites/CardRotation/cc-card_rotation_gold_card_without_shadow.png
-```
-
-It is the emission shape of the New Item celebration particle system
-(`ShapeModule`, `type: 19` = Sprite) in both
-`Assets/_Project/Prefabs/UI/FX/NewItemParticle.prefab` and the stray
-`Assets/new_item_particle.prefab`. Particles spawn along its outline, so it is
-never drawn on screen — only its silhouette matters, which makes it easy to
-replace with an equivalent rounded-rectangle frame of our own.
-
-`Assets/Royal/Infrastructure/Utils/Sprites/Additive Particle Material.mat` is
-unreferenced and can simply be deleted.
-
-Do this in Unity so the GUIDs are rewritten properly, then delete `Assets/Royal/`
-entirely. **This is a shipping blocker, not a cosmetic one.**
-
-### 2. Fill in the legal placeholders
+### 1. Fill in the legal placeholders
 
 Bracketed placeholders are deliberately visible so they cannot be missed. Find
 them with:
@@ -91,7 +72,7 @@ rg -i '\[[a-z][^\]]*\]' --glob '*.html'
 game actually works — not legal advice.** Have a lawyer review them before
 launch, particularly the governing-law, liability and consumer-rights clauses.
 
-### 3. Consider a mailbox on the domain
+### 2. Consider a mailbox on the domain
 
 The site publishes one address, `uniqgames@gmail.com`, and it is the only
 contact route anywhere on the site or in the legal pages. That works, but a
@@ -104,18 +85,7 @@ considerably more solid. If you switch, update every page at once:
 rg -l 'uniqgames@gmail\.com' --glob '*.html'
 ```
 
-### 4. Set the bundle ID in Unity
-
-*(Game repository.)* The agreed identifier is `com.monstersort.monstersort`, which is what
-`GoogleService-Info.plist` already uses. `ProjectSettings.asset` still has the
-old `com.factoryofmonstersgame.factoryofmonsters` for `Android` and `iPhone`,
-and the untouched default `com.DefaultCompany.2D-URP` for `Standalone`. All
-three need setting in Player Settings, per platform tab, before store
-submission. Afterwards, register the Android app under the new package name in
-the Firebase console and drop the regenerated `google-services.json` into
-`Assets/`.
-
-### 5. Swap the placeholder store badges at launch
+### 3. Swap the placeholder store badges at launch
 
 The App Store and Google Play badges are inert, marked `aria-disabled="true"`
 and labelled "Coming soon". Find every instance with:
@@ -130,7 +100,7 @@ Turn each `<span class="store-badge">` into an `<a href="...">`, drop the
 store-listing links, so replace the inline SVGs with the downloaded assets at
 that point.
 
-### 6. Approve the character copy
+### 4. Approve the character copy
 
 The three monsters on `/monster-sort/` are deliberately unnamed, because nothing
 in the Unity project names them — the art ships as `character_1/2/3.png` and the
