@@ -194,9 +194,9 @@ running. All pages currently pass at every width.
 ### Regenerating images
 
 `build_assets.py` reads the game's `Assets/_Project/Art/Sprites/`, resizes, trims
-transparent margins, hue-rotates the candy sprite into the six match colours,
-and composes the key art and the 1200×630 Open Graph card. It needs Pillow, and
-it needs the game repository checked out:
+transparent margins, cuts the candy set out of its reference sheet, and composes
+the logo and the 1200×630 Open Graph card. It needs Pillow, and it needs the game
+repository checked out:
 
 ```bash
 python3 -m pip install Pillow
@@ -218,14 +218,16 @@ Two things about it are worth knowing:
   constants in `WinCelebrationLayout.cs`. `lockup()` reproduces that same
   geometry, so if the in-game layout is retuned, copy the new numbers across and
   re-run. It emits both a bare wordmark and the badge version.
-- **The candy source sits at `Assets/candy_1.png`**, loose in the project root
-  rather than under `Art/Sprites/`, and is not referenced by
-  `CandyColorDatabase`. If it is ever tidied away, update the path in
-  `build_assets.py`.
+- **The candy is cut out of a reference sheet**, `tools/source/candy-sheet.png`.
+  The game colours its candy at runtime, so no per-colour sprite exists to read;
+  the sheet is a capture of the approved design, and `cut_candies()` keys it off
+  the flat grey backdrop. Swap the sheet if the art changes, keeping the same 2×4
+  layout, or replace the whole step if the colours ever land in the project as
+  files.
 
-There is no shippable gameplay capture in the project, so the phone frames show
-composed key art — the game's own backdrop with the logo, candy and cast on top.
-Replace `screen-splash` with a real screenshot when one exists.
+The phone frames show the first area's key art, `1-19_level_bg.png`, which
+already has all three monsters in it. Replace `screen-key-art` with a real
+gameplay capture when one exists.
 
 Content images are **WebP only**. PNG survives just where a platform demands it
 (favicons, the Apple touch icon, the PWA manifest icons), and the Open Graph

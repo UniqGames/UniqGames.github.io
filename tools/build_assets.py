@@ -20,7 +20,6 @@ lockup rather than shipping a hand-made copy that could drift from the game.
 
 from __future__ import annotations
 
-import colorsys
 import os
 import sys
 from pathlib import Path
@@ -63,6 +62,24 @@ SORT_RECT = (617, 256)
 MONSTER_CENTRE = (0, 112)
 SORT_CENTRE = (0, -72)
 MONSTER_STRETCH_X = 1.04
+
+# The candy set is drawn at runtime in game, so there is no per-colour sprite to
+# read. This reference sheet is the design as approved; replace it if the art
+# changes. Layout is (column, row) in a 2x4 grid, top-left first.
+CANDY_SHEET = SITE / "tools" / "source" / "candy-sheet.png"
+CANDY_SHEET_BG = (70, 70, 70)
+CANDY_GRID = (2, 4)
+CANDY_LAYOUT = {
+    "teal": (0, 0),
+    "blue": (1, 0),
+    "red": (0, 1),
+    "orange": (1, 1),
+    "yellow": (0, 2),
+    "pink": (1, 2),
+    "green": (0, 3),
+}
+# Editor gridlines sit about this far above the backdrop in brightness.
+GRIDLINE_LIFT = 26
 
 
 def load(rel: str, root: Path = SRC) -> Image.Image:
@@ -115,21 +132,71 @@ def emit_flat(img: Image.Image, name: str, width: int, bg=INK) -> None:
     print(f"  {name}  {scaled.width}x{scaled.height}")
 
 
-def recolour(img: Image.Image, hue: float, saturation_floor: float = 0.45) -> Image.Image:
-    """Hue-rotate the red candy sprite to build the match-item colour set."""
-    out = img.copy()
-    pixels = out.load()
-    for y in range(out.height):
-        for x in range(out.width):
-            r, g, b, a = pixels[x, y]
-            if a == 0:
-                continue
-            _, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-            if s < 0.08:  # keep the white highlight stripes neutral
-                continue
-            nr, ng, nb = colorsys.hsv_to_rgb(hue, max(s, saturation_floor), v)
-            pixels[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
+def cut_candies(sheet: Path) -> dict[str, Image.Image]:
+    """Lift each candy off the flat backdrop of the reference sheet.
+
+    The sheet is a screen grab laid out as a 2x4 grid, so the backdrop is one
+    neutral grey crossed by faint editor gridlines. Keying on plain colour
+    distance keeps those lines; keying on chroma drops them, because the lines
+    are neutral and the candy is not. Specular highlights are neutral too, hence
+    the brightness term alongside it.
+    """
+    image = Image.open(sheet).convert("RGB")
+    pixels = image.load()
+    width, height = image.size
+    cell_w, cell_h = width // CANDY_GRID[0], height // CANDY_GRID[1]
+    grey = sum(CANDY_SHEET_BG) / 3
+
+    def signal(x: int, y: int) -> float:
+        r, g, b = pixels[x, y]
+        chroma = max(r, g, b) - min(r, g, b)
+        return max(chroma, (r + g + b) / 3 - grey - GRIDLINE_LIFT)
+
+    out: dict[str, Image.Image] = {}
+    for name, (col, row) in CANDY_LAYOUT.items():
+        x0, y0 = col * cell_w, row * cell_h
+        solid = {
+            (x, y)
+            for y in range(y0, y0 + cell_h)
+            for x in range(x0, x0 + cell_w)
+            if signal(x, y) > 18
+        }
+        blob = largest_region(solid, (x0 + cell_w // 2, y0 + cell_h // 2))
+
+        mask = Image.new("L", (cell_w, cell_h), 0)
+        mask_px = mask.load()
+        for x, y in blob:
+            mask_px[x - x0, y - y0] = 255
+        # Pull the edge in before feathering it: the outermost pixels are part
+        # candy and part backdrop, and keeping them leaves a dark speckled rim.
+        mask = mask.filter(ImageFilter.MinFilter(5)).filter(ImageFilter.GaussianBlur(1.2))
+
+        # A gridline crossing a candy survives the key, because inside the blob
+        # it is just a lighter pixel. It is never more than two pixels wide, and
+        # the artwork is smooth, so a small median erases it without a trace.
+        candy = image.crop((x0, y0, x0 + cell_w, y0 + cell_h)).filter(ImageFilter.MedianFilter(5))
+        candy = candy.convert("RGBA")
+        candy.putalpha(mask)
+        out[name] = trim(candy)
     return out
+
+
+def largest_region(points: set[tuple[int, int]], seed: tuple[int, int]) -> set[tuple[int, int]]:
+    """Flood the region containing (or nearest to) `seed`, ignoring stray specks."""
+    if not points:
+        return set()
+    if seed not in points:
+        seed = min(points, key=lambda p: (p[0] - seed[0]) ** 2 + (p[1] - seed[1]) ** 2)
+
+    region = {seed}
+    stack = [seed]
+    while stack:
+        x, y = stack.pop()
+        for neighbour in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if neighbour in points and neighbour not in region:
+                region.add(neighbour)
+                stack.append(neighbour)
+    return region
 
 
 def lockup(badge: Image.Image | None, monster: Image.Image, sort: Image.Image, supersample: float = 2.0) -> Image.Image:
@@ -165,43 +232,6 @@ def radial_backdrop(size: tuple[int, int]) -> Image.Image:
         r = radius * t
         draw.ellipse((cx - r, cy - r * 0.85, cx + r, cy + r * 0.85), fill=colour)
     return small.resize(size, Image.LANCZOS).filter(ImageFilter.GaussianBlur(6))
-
-
-# Candies drifting through the empty middle band of the key art: colour, centre as a
-# fraction of the canvas, diameter as a fraction of the width, and rotation.
-SPLASH_CANDIES = (
-    ("purple", (0.17, 0.485), 0.175, -14),
-    ("blue", (0.74, 0.445), 0.215, 22),
-    ("green", (0.45, 0.575), 0.140, 8),
-    ("orange", (0.88, 0.605), 0.115, -30),
-    ("yellow", (0.28, 0.665), 0.105, 16),
-)
-
-
-def splash(
-    background: Image.Image,
-    logo: Image.Image,
-    cast: Image.Image,
-    candies: dict[str, Image.Image],
-    name: str,
-    width: int,
-) -> None:
-    """The portrait key art shown inside the phone frames: game backdrop, logo, candies, cast."""
-    card = fit(background, width).convert("RGBA")
-    w, h = card.size
-
-    mark = fit(logo, round(w * 0.82))
-    paste_centre(card, mark, (w / 2, h * 0.25))
-
-    for colour, (fx, fy), fsize, angle in SPLASH_CANDIES:
-        ball = fit(candies[colour], round(w * fsize)).rotate(angle, Image.BICUBIC, expand=True)
-        paste_centre(card, ball, (w * fx, h * fy))
-
-    trio = fit(trim(cast), round(w * 0.98))
-    card.alpha_composite(trio, (round((w - trio.width) / 2), round(h * 0.98 - trio.height)))
-
-    card.convert("RGB").save(OUT / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
-    print(f"  {name}  {w}x{h}")
 
 
 def social_card(name: str, logo: Image.Image, cast: Image.Image) -> None:
@@ -266,34 +296,20 @@ def main() -> None:
     emit_alpha(trio, "monsters-trio", 1000)
 
     print("candies")
-    source_candy = trim(load("candy_1.png", root=ASSETS))
-    # Hue targets sampled from CandyColorDatabase.
-    candies = {
-        name: recolour(source_candy, hue / 360)
-        for name, hue in (
-            ("red", 358),
-            ("orange", 30),
-            ("yellow", 48),
-            ("green", 104),
-            ("blue", 219),
-            ("purple", 276),
-        )
-    }
-    for name, image in candies.items():
+    for name, image in cut_candies(CANDY_SHEET).items():
         emit_alpha(image, f"candy-{name}", 240)
 
     print("scenes")
-    # There is no shippable gameplay capture in the project yet, so the phone frames
-    # show the game's own backdrop with the logo lockup and cast composited on top —
-    # the same arrangement the player sees while a level loads.
-    splash(load("UI/Gameplay/Backgrounds/gameplay_bg.png"), emblem, trio, candies, "screen-splash", 720)
+    # The phone frame shows the first area's key art, which already has all three
+    # monsters in it, rather than a composite of our own.
+    key_art = load("UI/MainMenu/Backgrounds/1-19_level_bg.png")
+    emit_flat(key_art, "screen-key-art", 720)
 
     print("world")
     world = {
         "area-holiday-road": ("UI/Areas/first_area.png", 720),
         "area-treasure-island": ("UI/Areas/second_area.png", 720),
         "panel-leaderboard": ("UI/LockScreens/leaderboard_image.png", 720),
-        "panel-collection": ("UI/Areas/card_collection_image.png", 720),
     }
     for name, (rel, width) in world.items():
         emit_alpha(trim(load(rel)), name, width)
@@ -307,7 +323,6 @@ def main() -> None:
         "item-mystery": ("UI/Gameplay/New Item/mystery_ball.png", 320),
         "item-curtain": ("UI/Gameplay/New Item/curtain_item.png", 320),
         "item-stone": ("UI/Gameplay/New Item/NewItem_Stone.png", 320),
-        "icon-coin": ("UI/MainMenu/Currency/coin.png", 200),
     }
     for name, (rel, width) in items.items():
         emit_alpha(trim(load(rel)), name, width)

@@ -749,7 +749,14 @@ button {
   background: var(--gray-100);
 }
 
-/* For cut-out art that should float rather than sit in a filled panel. */
+.split__media img {
+  width: 100%;
+}
+
+/* For cut-out art that should float rather than sit in a filled panel. Capping
+   the height has to come with width: auto, or the image is squashed to fit —
+   and this block must stay after the one above, which sets the same property at
+   the same specificity. */
 .split__media--bare {
   background: transparent;
   border-radius: 0;
@@ -758,11 +765,8 @@ button {
 .split__media--bare img {
   margin-inline: auto;
   width: auto;
+  max-width: 100%;
   max-height: clamp(320px, 40vw, 520px);
-}
-
-.split__media img {
-  width: 100%;
 }
 
 .split + .split {
@@ -1107,18 +1111,32 @@ button {
   color: var(--gray-300);
 }
 
-.prose > * + * {
+/* Vertical rhythm. These pages wrap their body in .container, so the flow rule
+   has to reach through that wrapper as well as apply directly. */
+:is(.prose, .prose > .container) > * + * {
   margin-top: var(--s-24);
 }
 
-.prose h2 {
+:is(.prose, .prose > .container) > * + h2 {
   margin-top: var(--s-64);
+}
+
+:is(.prose, .prose > .container) > * + h3 {
+  margin-top: var(--s-40);
+}
+
+/* A heading leads the block beneath it, so it sits closer to that than to the
+   section it follows. */
+:is(.prose, .prose > .container) > :is(h2, h3) + * {
+  margin-top: var(--s-16);
+}
+
+.prose h2 {
   font-size: var(--title-sm);
   scroll-margin-top: calc(var(--header-h) + var(--s-24));
 }
 
 .prose h3 {
-  margin-top: var(--s-40);
   font-size: var(--title-xs);
 }
 
