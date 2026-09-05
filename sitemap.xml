@@ -22,17 +22,22 @@
   </url>
   <url>
     <loc>https://uniqgames.net/terms/</loc>
-    <lastmod>2026-08-05</lastmod>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://uniqgames.net/privacy/</loc>
-    <lastmod>2026-08-05</lastmod>
+    <lastmod>2026-09-05</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uniqgames.net/cookies/</loc>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://uniqgames.net/privacy-preferences/</loc>
-    <lastmod>2026-08-05</lastmod>
+    <lastmod>2026-09-05</lastmod>
     <priority>0.3</priority>
   </url>
 </urlset>

@@ -20,10 +20,10 @@ buttons in Settings break:
 
 | URL | Opened from |
 | --- | --- |
-| `uniqgames.net/support` | Support row — `Settings/SettingsPageView.cs` |
-| `uniqgames.net/terms` | Terms of Service row — `Settings/SettingsTermsPopup.cs` |
-| `uniqgames.net/privacy` | Privacy Policy row — `Settings/SettingsTermsPopup.cs` |
-| `uniqgames.net/privacy-preferences` | Privacy Preferences row — `Settings/SettingsTermsPopup.cs` |
+| `uniqgames.net/support/` | Support row — `Settings/SettingsPageView.cs` |
+| `uniqgames.net/terms/` | Terms of Service row — `Settings/SettingsTermsPopup.cs` |
+| `uniqgames.net/privacy/` | Privacy Policy row — `Settings/SettingsTermsPopup.cs` |
+| `uniqgames.net/privacy-preferences/` | Privacy Preferences row — `Settings/SettingsTermsPopup.cs` |
 
 Those scripts are in the game repository, and their defaults are also serialized
 into `Assets/_Project/Prefabs/UI/SettingsPage.prefab`. **Changing one without the
@@ -53,24 +53,23 @@ This repository is public, so it covers the site only. The game's own launch
 blockers are tracked privately, in `Assets/_Project/Documentation/PRE-LAUNCH.md`
 in the game repository.
 
-### 1. Fill in the legal placeholders
+### 1. Fill in the remaining legal details
 
-Bracketed placeholders are deliberately visible so they cannot be missed. Find
-them with:
+The policies are written for **Uniq Games Studio** as the controller, with
+`uniqgames@gmail.com` as the contact, Türkiye as governing law, and an honest
+account of Firebase (Auth, Firestore, Functions, Crashlytics, Analytics,
+Remote Config). They are not legal advice. Have a lawyer review them before
+store submission.
 
-```bash
-rg -i '\[[a-z][^\]]*\]' --glob '*.html'
-```
+Still to publish on `privacy/` when you have them:
 
-| Placeholder | Appears in |
+| Detail | Why |
 | --- | --- |
-| `[registered legal entity name]`, `[registered address]`, `[country]`, `[company registration number]` | `privacy/`, `terms/` |
-| `[representative name and address]` — an EU/UK Article 27 representative, if one is required | `privacy/` |
-| `[governing law jurisdiction]`, `[competent courts]` | `terms/` |
+| Registered office / trade-registry number | KVKK veri sorumlusu identity, App Store contact |
+| EU/UK Article 27 representative, if one is required | Only if you offer the game in the EEA/UK at scale without an establishment there |
 
-**These documents are a solid, accurate starting point written against how the
-game actually works — not legal advice.** Have a lawyer review them before
-launch, particularly the governing-law, liability and consumer-rights clauses.
+The Cookie Policy lives at `/cookies/` and is linked from the footer, Privacy
+Policy and Privacy preferences. It does not need a fourth in-game button.
 
 ### 2. Consider a mailbox on the domain
 
@@ -245,6 +244,7 @@ card is additionally written as JPEG because some scrapers still reject WebP.
 ├── support/                    ← linked from the game
 ├── terms/                      ← linked from the game
 ├── privacy/                    ← linked from the game
+├── cookies/                    Cookie and SDK inventory
 ├── privacy-preferences/        ← linked from the game
 ├── 404.html
 ├── assets/css/main.css         The whole design system, one file
@@ -287,6 +287,7 @@ work without scripting.
 
 The site sets **no cookies at all** — no analytics, no advertising, no tracking
 — which is why there is no consent banner. The only client-side storage is the
-`uniqgames.privacy-preferences` key written by the preferences form. Section 11
-of `privacy/` states this in writing, so if analytics are ever added, that
-section and a real consent mechanism have to land in the same change.
+`uniqgames.privacy-preferences` key written by the preferences form. The Cookie
+Policy at `/cookies/` states this in writing, so if analytics are ever added,
+that page, Privacy preferences and a real consent mechanism have to land in the
+same change. The game's Firebase SDKs are listed there separately.
