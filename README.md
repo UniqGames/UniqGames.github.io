@@ -1,7 +1,7 @@
 # Uniq Games website
 
 The public site for the studio (**Uniq Games**) and its first title (**Monster
-Sort**). It exists primarily because the game links out to it from the Settings
+Trip**). It exists primarily because the game links out to it from the Settings
 screen, and secondarily as the marketing and press home for the studio.
 
 Plain static HTML, CSS and JavaScript. No framework, no bundler, no build step —
@@ -101,7 +101,7 @@ that point.
 
 ### 4. Approve the character copy
 
-The three monsters on `/monster-sort/` are deliberately unnamed, because nothing
+The three monsters on `/monster-trip/` are deliberately unnamed, because nothing
 in the Unity project names them — the art ships as `character_1/2/3.png` and the
 site's assets follow suit as `monster-red/yellow/teal.webp`. Only the short trait
 lines and biographies are invented copy; approve or rewrite those. If you ever do
@@ -211,12 +211,11 @@ UNITY_PROJECT=~/code/MonsterSort python3 tools/build_assets.py
 
 Two things about it are worth knowing:
 
-- **The logo is assembled, not copied.** No flattened Monster Sort wordmark
-  exists in the project. The game builds it at runtime from three sprites —
-  `logo_a` (badge plate), `logo_b` ("MONSTER"), `logo_c` ("SORT") — using the
-  constants in `WinCelebrationLayout.cs`. `lockup()` reproduces that same
-  geometry, so if the in-game layout is retuned, copy the new numbers across and
-  re-run. It emits both a bare wordmark and the badge version.
+- **The logo is a flattened Monster Trip lockup**, `tools/source/logo-monster-trip.png`.
+  The site ships it as `logo-monster-trip.webp` (and a matching badge-sized copy).
+  Replacing that PNG and re-running the script updates the mark and the Open Graph
+  card. Do not rebuild it from the old in-game `logo_a` / `logo_b` / `logo_c` sprites;
+  those still spell SORT.
 - **The candy is cut out of a reference sheet**, `tools/source/candy-sheet.png`.
   The game colours its candy at runtime, so no per-colour sprite exists to read;
   the sheet is a capture of the approved design, and `cut_candies()` keys it off
@@ -239,7 +238,8 @@ card is additionally written as JPEG because some scrapers still reject WebP.
 ```
 .
 ├── index.html                  Studio home — source of truth for the shell
-├── monster-sort/               Game page: how it plays, characters, world, events
+├── monster-trip/               Game page: how it plays, characters, world, events
+├── monster-sort/               Redirect to /monster-trip/
 ├── about/                      The studio
 ├── support/                    ← linked from the game
 ├── terms/                      ← linked from the game

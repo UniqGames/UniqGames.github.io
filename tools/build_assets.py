@@ -12,10 +12,8 @@ only where a platform demands it: favicons, the Apple touch icon and the PWA
 manifest icons. The Open Graph card is additionally written as JPEG because some
 social scrapers still refuse WebP.
 
-The Monster Sort wordmark does not exist as a single flattened file. In game it
-is assembled at runtime from three sprites (badge plate, "MONSTER", "SORT") using
-the constants in WinCelebrationLayout.cs, so this script reproduces that same
-lockup rather than shipping a hand-made copy that could drift from the game.
+The Monster Trip logo is the flattened lockup at tools/source/logo-monster-trip.png.
+Do not rebuild it from the in-game celebration sprites: those still spell SORT.
 """
 
 from __future__ import annotations
@@ -200,7 +198,7 @@ def largest_region(points: set[tuple[int, int]], seed: tuple[int, int]) -> set[t
 
 
 def lockup(badge: Image.Image | None, monster: Image.Image, sort: Image.Image, supersample: float = 2.0) -> Image.Image:
-    """Rebuild the in-game Monster Sort logo. Pass badge=None for the bare wordmark."""
+    """Legacy SORT lockup. Unused; the shipped mark is tools/source/logo-monster-trip.png."""
     k = supersample
     canvas = Image.new("RGBA", (round(1400 * k), round(1000 * k)), (0, 0, 0, 0))
     cx, cy = canvas.width / 2, canvas.height / 2
@@ -274,13 +272,11 @@ def main() -> None:
     print(f"source: {SRC}\noutput: {OUT}\n")
 
     print("brand")
-    badge = load("UI/Gameplay/Celebration/logo_a.png")
-    monster = load("UI/Gameplay/Celebration/logo_b.png")
-    sort = load("UI/Gameplay/Celebration/logo_c.png")
-    wordmark = lockup(None, monster, sort)
-    emblem = lockup(badge, monster, sort)
-    emit_alpha(wordmark, "logo-monster-sort", 900)
-    emit_alpha(emblem, "logo-monster-sort-badge", 1000)
+    trip = trim(load("logo-monster-trip.png", root=SITE / "tools" / "source"))
+    emit_alpha(trip, "logo-monster-trip", 900)
+    emit_alpha(trip, "logo-monster-trip-badge", 1000)
+    emit_alpha(trip, "logo-monster-sort", 900)
+    emit_alpha(trip, "logo-monster-sort-badge", 1000)
     icons(load("UI/AppIcon/App_icon2.png"))
 
     print("cast")
@@ -328,7 +324,7 @@ def main() -> None:
         emit_alpha(trim(load(rel)), name, width)
 
     print("social")
-    social_card("og-default", emblem, trio)
+    social_card("og-default", trip, trio)
 
     print("\ndone")
 
