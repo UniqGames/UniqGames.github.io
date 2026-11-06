@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yes! Blocks — a number puzzle from Uniq Games</title>
+<meta name="description" content="Yes! Blocks is a number puzzle. Drag a rectangle that matches the clue, fill the board, and leave the holes empty. Coming to iOS and Android.">
+<link rel="canonical" href="https://uniqgames.net/yesblocks/">
+<meta name="theme-color" content="#ffffff">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Uniq Games">
+<meta property="og:title" content="Yes! Blocks — a number puzzle from Uniq Games">
+<meta property="og:description" content="Match the number. Fill the board. Coming to iOS and Android.">
+<meta property="og:url" content="https://uniqgames.net/yesblocks/">
+<meta property="og:image" content="https://uniqgames.net/assets/img/og-default.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/img/favicon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f%5B%5D=satoshi@400,500,700,900&display=swap">
+<link rel="stylesheet" href="/assets/css/main.css">
+<script src="/assets/js/main.js" defer></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Yes! Blocks",
+  "url": "https://uniqgames.net/yesblocks/",
+  "image": "https://uniqgames.net/assets/img/logo-yes-blocks.png",
+  "description": "A number puzzle about drawing rectangles that match the clues on the board.",
+  "genre": ["Puzzle", "Casual"],
+  "gamePlatform": ["iOS", "Android"],
+  "applicationCategory": "GameApplication",
+  "publisher": { "@type": "Organization", "name": "Uniq Games" }
+}
+</script>
+<style>
+  .yb-logo {
+    width: min(100%, 340px);
+    height: auto;
+  }
+  .yb-board {
+    width: min(100%, 420px);
+    margin-inline: auto;
+    padding: 22px;
+    border-radius: 36px;
+    background: #f6efe4;
+    box-shadow: var(--shadow-lg);
+  }
+  .yb-board svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- shell:header -->
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="/" aria-label="Uniq Games — home">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+        <rect width="40" height="40" rx="12" fill="url(#markHeader)"/>
+        <circle cx="20" cy="20" r="10.5" fill="#fff"/>
+        <circle cx="22.4" cy="18.4" r="5.4" fill="#120f1f"/>
+        <circle cx="24.6" cy="16.4" r="1.8" fill="#fff"/>
+        <defs>
+          <linearGradient id="markHeader" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#9C4FD9"/><stop offset="1" stop-color="#5A16C7"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="brand__name">Uniq Games</span>
+    </a>
+
+    <nav class="nav" aria-label="Primary">
+      <ul class="nav__list">
+        <li class="nav__item">
+          <a class="nav__link" href="/monster-trip/">Monster Trip</a>
+        </li>
+        <li class="nav__item">
+          <a class="nav__link" href="/about/">About</a>
+        </li>
+        <li class="nav__item">
+          <a class="nav__link" href="/support/">Support</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <a class="btn btn--primary" href="/monster-trip/#get-the-game">Get the game</a>
+    </div>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Kept outside <header>: its backdrop-filter would otherwise become the
+     containing block for this fixed-position panel. -->
+<div class="mobile-nav" id="mobile-nav">
+    <nav aria-label="Mobile">
+      <div class="mobile-nav__group">
+        <span class="mobile-nav__title">Game</span>
+        <a href="/monster-trip/">Monster Trip</a>
+        <a href="/monster-trip/#how-it-works">How it plays</a>
+      </div>
+      <div class="mobile-nav__group">
+        <span class="mobile-nav__title">Studio</span>
+        <a href="/about/">About Uniq Games</a>
+      </div>
+      <div class="mobile-nav__group">
+        <span class="mobile-nav__title">Help</span>
+        <a href="/support/">Support</a>
+        <a href="/privacy/">Privacy Policy</a>
+        <a href="/terms/">Terms of Service</a>
+        <a href="/cookies/">Cookie Policy</a>
+        <a href="/privacy-preferences/">Privacy preferences</a>
+      </div>
+      <a class="btn btn--primary" href="/monster-trip/#get-the-game">Get the game</a>
+    </nav>
+  </div>
+<!-- /shell:header -->
+
+<main id="main">
+
+  <section class="hero">
+    <div class="container">
+      <div class="split">
+        <div class="split__copy">
+          <h1>
+            <img class="yb-logo" src="/assets/img/logo-yes-blocks.png" width="658" height="442" alt="Yes! Blocks" fetchpriority="high" decoding="async">
+          </h1>
+          <p class="lede">A number sits on the board. Drag a rectangle that covers exactly that many cells. Fill every open square, and leave the holes alone.</p>
+          <div class="store-row">
+            <span class="store-badge" aria-disabled="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.73-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.7.71 2.87.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.29-3.5zM14.86 6.1c.6-.74 1.02-1.75.9-2.77-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.7-.93 2.7.97.08 1.97-.5 2.59-1.24z"/></svg>
+              <span>Coming soon on the</span><strong>App Store</strong>
+            </span>
+            <span class="store-badge" aria-disabled="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.61 2.29c-.31.33-.49.83-.49 1.48v16.46c0 .65.18 1.15.49 1.48l.06.05 9.22-9.22v-.22L3.67 2.24l-.06.05zM16.9 15.13l-3.07-3.07v-.22l3.08-3.08.07.04 3.64 2.07c1.04.59 1.04 1.56 0 2.15l-3.64 2.07-.08.04zM15.94 15.85 12.8 12.7l-9.19 9.19c.34.36.91.4 1.55.05l10.78-6.09M15.94 8.15 5.16 2.06c-.64-.36-1.21-.31-1.55.05l9.19 9.19 3.14-3.15z"/></svg>
+              <span>Coming soon on</span><strong>Google Play</strong>
+            </span>
+          </div>
+        </div>
+        <div class="yb-board" aria-hidden="true">
+          <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="8" width="148" height="72" rx="18" fill="#4A91F9"/>
+            <text x="82" y="54" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="32" font-weight="700" fill="#fff">4</text>
+            <rect x="164" y="8" width="148" height="148" rx="22" fill="#FD2E64"/>
+            <text x="238" y="96" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="40" font-weight="700" fill="#fff">6</text>
+            <rect x="8" y="88" width="72" height="148" rx="18" fill="#2D9FA0"/>
+            <text x="44" y="172" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="32" font-weight="700" fill="#fff">4</text>
+            <rect x="88" y="88" width="68" height="68" rx="16" fill="#FBC12E"/>
+            <text x="122" y="132" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="28" font-weight="700" fill="#1e1e1e">2</text>
+            <rect x="88" y="164" width="148" height="72" rx="18" fill="#FE6519"/>
+            <text x="162" y="210" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="32" font-weight="700" fill="#fff">4</text>
+            <rect x="244" y="164" width="68" height="148" rx="18" fill="#2A6092"/>
+            <text x="278" y="248" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="28" font-weight="700" fill="#fff">4</text>
+            <rect x="8" y="244" width="228" height="68" rx="18" fill="#6F4599"/>
+            <text x="122" y="288" text-anchor="middle" font-family="Satoshi, sans-serif" font-size="32" font-weight="700" fill="#fff">6</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--wash" id="how-it-plays">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">How it plays</span>
+        <h2 class="title-lg">One number. One rectangle.</h2>
+      </div>
+      <div class="cards cards--3">
+        <article class="card">
+          <h3 class="title-xs">Match the clue</h3>
+          <p>Each number belongs to exactly one rectangle, and the rectangle covers that many cells. Nothing more.</p>
+        </article>
+        <article class="card">
+          <h3 class="title-xs">Mind the holes</h3>
+          <p>Some squares are missing on purpose. A finished board fills every open cell and leaves those gaps empty.</p>
+        </article>
+        <article class="card">
+          <h3 class="title-xs">Stuck? Spend a coin</h3>
+          <p>Clearing a level earns coins. A hint spends them and shows one correct shape. Your progress stays on the device.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container--narrow">
+      <div class="section-head center">
+        <span class="eyebrow">From the studio</span>
+        <h2 class="title-lg">Yes! Blocks</h2>
+        <p class="lede">A puzzle from Uniq Games Studio for iPhone and Android. No account, no ads. Questions go to <a href="mailto:uniqgames@gmail.com">uniqgames@gmail.com</a>.</p>
+        <p><a href="/yesblocks/support/">Support</a> · <a href="/yesblocks/privacy/">Privacy Policy</a> · <a href="/yesblocks/terms/">Terms of Service</a></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- shell:footer -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="brand" href="/" aria-label="Uniq Games — home">
+          <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+            <rect width="40" height="40" rx="12" fill="url(#markFooter)"/>
+            <circle cx="20" cy="20" r="10.5" fill="#fff"/>
+            <circle cx="22.4" cy="18.4" r="5.4" fill="#120f1f"/>
+            <circle cx="24.6" cy="16.4" r="1.8" fill="#fff"/>
+            <defs>
+              <linearGradient id="markFooter" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#9C4FD9"/><stop offset="1" stop-color="#5A16C7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="brand__name">Uniq Games</span>
+        </a>
+        <p class="footer__blurb">An independent mobile game studio. Makers of Monster Trip.</p>
+        <div class="copy-field">
+          <a href="mailto:uniqgames@gmail.com">uniqgames@gmail.com</a>
+          <button class="copy-btn" type="button" data-copy="uniqgames@gmail.com">Copy</button>
+        </div>
+      </div>
+
+      <div class="footer__col">
+        <h2>Game</h2>
+        <ul>
+          <li><a href="/monster-trip/">Monster Trip</a></li>
+          <li><a href="/monster-trip/#how-it-works">How it plays</a></li>
+          <li><a href="/monster-trip/#get-the-game">Get the game</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__col">
+        <h2>Studio</h2>
+        <ul>
+          <li><a href="/about/">About us</a></li>
+          <li><a href="mailto:uniqgames@gmail.com">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__col">
+        <h2>Help</h2>
+        <ul>
+          <li><a href="/support/">Support</a></li>
+          <li><a href="/support/#account">Account &amp; data</a></li>
+          <li><a href="/privacy-preferences/">Privacy preferences</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>&copy; <span data-year>2026</span> Uniq Games. All rights reserved.</p>
+      <ul class="footer__legal">
+        <li><a href="/terms/">Terms of Service</a></li>
+        <li><a href="/privacy/">Privacy Policy</a></li>
+        <li><a href="/cookies/">Cookie Policy</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<!-- /shell:footer -->
+
+</body>
+</html>
