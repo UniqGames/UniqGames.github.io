@@ -1,7 +1,8 @@
 name: Deploy website
 
-# Publishes this repository to GitHub Pages. The site is plain static HTML, so
-# there is no build step — the folder is uploaded as-is, minus the tooling.
+# Publishes the static site by updating the gh-pages branch. GitHub Pages
+# builds that branch itself. The Actions artifact deploy was staying on
+# "updating_pages" until it hit the 10 minute limit and cancelled the publish.
 
 on:
   push:
@@ -9,18 +10,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Do not cancel a Pages publish that is already updating. Cancelling one
-# leaves the deployment stuck, and the next run then waits until it times out.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  verify:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,31 +28,19 @@ jobs:
         run: python3 tools/sync_shell.py --check
       - name: Internal links and assets resolve
         run: python3 tools/check_links.py
-
-  deploy:
-    needs: verify
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - name: Stage the site without the repository plumbing
+      - name: Publish the static site
         run: |
-          mkdir -p _site
+          rm -rf /tmp/site
+          mkdir -p /tmp/site
           rsync -a \
-            --exclude '_site/' \
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude 'tools/' \
             --exclude 'README.md' \
-            ./ _site/
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          timeout: 1200000
+            --exclude '_site/' \
+            ./ /tmp/site/
+          cd /tmp/site
+          git init -b gh-pages
+          git add -A
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Publish site"
+          git push --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:gh-pages
